@@ -40,34 +40,7 @@
         .domain([0, 4500])
         .rangeRound([440, 950]);
       
-    // button part //    
-    var button4Color = svg.append("rect")
-        .attr("class", "button4color")
-        .attr("transform", "translate(520, 70)")
-        .attrs({
-          "width": 240,
-          "height": 30})
-        .attr("stroke", "steelblue")
-        .attr("fill", "#fff");
-    
-    var button4State = svg.append("rect")
-        .attr("class", "button4state")
-        .attr("transform", "translate(520, 110)")
-        .attrs({
-          "width": 240,
-          "height": 30})
-        .attr("stroke", "steelblue")
-        .attr("fill", "#fff");
-    
-    var button4Tract = svg.append("rect")
-        .attr("class", "button4state")
-        .attr("transform", "translate(520, 140)")
-        .attrs({
-          "width": 240,
-          "height": 30})
-        .attr("stroke", "steelblue")
-        .attr("fill", "#fff");
-        
+    // button part //
     svg.append("text")
         .attr("class", "button4color")
         .attr("x", "540")
@@ -93,14 +66,44 @@
         .style("fill", "#000")
         .attr("front-size", "12px")
         .attr("text-anchor", "start")
-        .text("Toggle Census Tract Boundary");         
+        .text("Toggle Census Tract Boundary"); 
         
+    var button4Color = svg.append("rect")
+        .attr("class", "button4color")
+        .attr("transform", "translate(520, 70)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff")
+        .style("opacity", 0.3);
+
+    
+    var button4State = svg.append("rect")
+        .attr("class", "button4state")
+        .attr("transform", "translate(520, 110)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff")
+        .style("opacity", 0.3);
+    
+    var button4Tract = svg.append("rect")
+        .attr("class", "button4state")
+        .attr("transform", "translate(520, 140)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff")
+        .style("opacity", 0.3);
         
     var g = svg.append("g")
         .attr("class", "key")
         .attr("transform", "translate(0,40)");
 
-    g.selectAll("rect")
+    var legend = g.selectAll("rect")
       .data(color.range().map(function(d) {
           d = color.invertExtent(d);
           if (d[0] == null) d[0] = x.domain()[0];
@@ -131,22 +134,83 @@
         .remove();
 
     d3.json("wc-merge-state-topo.json", function(error, topology) {
-      if (error) throw error;
-
-      svg.append("g")
-        .selectAll("path")
-        .data(topojson.feature(topology, topology.objects.tracts).features)
-        .attr("transform", "translate(500, 0)")
-        .enter().append("path")
-          .attr("fill", function(d) { return color(d.properties.density); })
-          .attr("d", path);
-
-      svg.append("path")
-          .datum(topojson.feature(topology, topology.objects.counties))
-          .attr("fill", "none")
-          .attr("stroke", "#000")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", path);
+        if (error) throw error;
+        var isBlue = false;
+        var displayTract = false;
+        var displayBoundary = false;
+        
+        desity = svg.append("g")
+            .selectAll("path")
+            .data(topojson.feature(topology, topology.objects.tracts).features)
+            .attr("transform", "translate(500, 0)")
+            .enter().append("path")
+              .attr("fill", function(d) { return color(d.properties.density); })
+              .attr("d", path);
+        
+        noStateBound = svg.append("path")
+            .datum(topojson.feature(topology, topology.objects.states))
+            .attr("fill", "none")
+            .attr("stroke", "#000")
+            .attr("stroke-opacity", 0.5)
+            .attr("d", path);
+        
+        stateBound = svg.append("path")
+            .datum(topojson.feature(topology, topology.objects.counties))
+            .attr("fill", "none")
+            .attr("stroke", "#000")
+            .attr("stroke-opacity", 0)
+            .attr("d", path);
+        
+        tracts = svg.append("path")
+            .datum(topojson.feature(topology, topology.objects.tracts))
+            .attr("fill", "none")
+            .attr("stroke", "#000")
+            .attr("stroke-opacity", 0)
+            .attr("d", path);
+        
+        button4Color.on("click", function() {
+            console.log('color was clicked');
+            console.log(isBlue);
+            if (isBlue) {
+                color.range(d3.schemeOrRd[9]);
+                desity.attr("fill", function(d) { 
+                    return color(d.properties.density); });
+                legend.attr("fill", function(d) { return color(d[0]); });
+                isBlue = false;
+            } else {
+                color.range(d3.schemeBlues[9]);
+                desity.attr("fill", function(d) { 
+                    return color(d.properties.density); });
+                legend.attr("fill", function(d) { return color(d[0]); });
+                isBlue = true;
+            }
+        });
+        button4Tract.on('click', function() {
+            console.log('tract was clicked');
+            if (displayTract) {
+                tracts.attr("stroke-opacity", 0);
+                displayTract = false;
+            } else {
+                tracts.attr("stroke-opacity", 0.3);
+                displayTract = true;
+            }
+        });
+        
+        button4State.on('click', function() {
+            console.log('states was clicked');
+            if (displayBoundary) {
+                noStateBound.attr("stroke-opacity", 0.5);
+                stateBound.attr("stroke-opacity", 0);
+                displayBoundary = false;
+            } else {
+                noStateBound.attr("stroke-opacity", 0);
+                stateBound.attr("stroke-opacity", 0.5);
+                displayBoundary = true;
+            }
+        });
+        
+        
+        
     });
     </script> 
     
