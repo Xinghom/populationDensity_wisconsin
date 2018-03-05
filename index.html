@@ -4,19 +4,157 @@
   <head>
     <!-- Meta Tag -->
     <meta charset="utf-8">
-    <!-- D3.js Source -->
-    <script type= "text/javascript" src="https://d3js.org/d3.v4.min.js"></script> 
-  </head>
+      
+    <style>
+
+    </style>
     
+    <!-- D3.js Source -->
+    <script type= "text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    
+  </head>
+
   <body>
       <!-- Change the title below: REQUIRED-->
     <h1 style = "text-align:center; color:#033066">
         <bold>Population Density of Wisconsin, 2018</bold>
     </h1>
-    <!-- Your D3.js code for making a Bar Graph -->
-    <script type="text/javascript" src=""></script> 
+    <svg style = "align-content:center"></svg>
+      
+    <script>
+    var svg = d3.select("svg")
+                .attr("margin", "auto")
+                .attr("width", "960")
+                .attr("height", "1000");
+    
+    var path = d3.geoPath();
+
+    var color = d3.scaleThreshold()
+        .domain([1, 10, 50, 200, 500, 1000, 2000, 4000])
+        .range(d3.schemeOrRd[9]);
+
+    var x = d3.scaleSqrt()
+        .domain([0, 4500])
+        .rangeRound([440, 950]);
+      
+    // button part //    
+    var button4Color = svg.append("rect")
+        .attr("class", "button4color")
+        .attr("transform", "translate(520, 70)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff");
+    
+    var button4State = svg.append("rect")
+        .attr("class", "button4state")
+        .attr("transform", "translate(520, 110)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff");
+    
+    var button4Tract = svg.append("rect")
+        .attr("class", "button4state")
+        .attr("transform", "translate(520, 140)")
+        .attrs({
+          "width": 240,
+          "height": 30})
+        .attr("stroke", "steelblue")
+        .attr("fill", "#fff");
+        
+    svg.append("text")
+        .attr("class", "button4color")
+        .attr("x", "540")
+        .attr("y", "90")
+        .style("fill", "#000")
+        .attr("front-size", "12px")
+        .attr("text-anchor", "start")
+        .text("Change color on visulization");
+    
+    svg.append("text")
+        .attr("class", "toggleState")
+        .attr("x", "540")
+        .attr("y", "130")
+        .style("fill", "#000")
+        .attr("front-size", "12px")
+        .attr("text-anchor", "start")
+        .text("Toggle State Boundary"); 
+    
+    svg.append("text")
+        .attr("class", "toggleTracts")
+        .attr("x", "540")
+        .attr("y", "160")
+        .style("fill", "#000")
+        .attr("front-size", "12px")
+        .attr("text-anchor", "start")
+        .text("Toggle Census Tract Boundary");         
+        
+        
+    var g = svg.append("g")
+        .attr("class", "key")
+        .attr("transform", "translate(0,40)");
+
+    g.selectAll("rect")
+      .data(color.range().map(function(d) {
+          d = color.invertExtent(d);
+          if (d[0] == null) d[0] = x.domain()[0];
+          if (d[1] == null) d[1] = x.domain()[1];
+          return d;
+        }))
+      .enter().append("rect")
+        .attr("height", 8)
+        .attr("x", function(d) { 
+            console.log(x(d[0]));
+            return x(d[0]); })
+        .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+        .attr("fill", function(d) { return color(d[0]); });
+
+    g.append("text")
+        .attr("class", "caption")
+        .attr("x", x.range()[0])
+        .attr("y", -10)
+        .attr("fill", "#000")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "bold")
+        .text("Population per square mile");
+
+    g.call(d3.axisBottom(x)
+        .tickSize(13)
+        .tickValues(color.domain()))
+      .select(".domain")
+        .remove();
+
+    d3.json("wc-merge-state-topo.json", function(error, topology) {
+      if (error) throw error;
+
+      svg.append("g")
+        .selectAll("path")
+        .data(topojson.feature(topology, topology.objects.tracts).features)
+        .attr("transform", "translate(500, 0)")
+        .enter().append("path")
+          .attr("fill", function(d) { return color(d.properties.density); })
+          .attr("d", path);
+
+      svg.append("path")
+          .datum(topojson.feature(topology, topology.objects.counties))
+          .attr("fill", "none")
+          .attr("stroke", "#000")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", path);
+    });
+    </script> 
+    
+      
+      
+      
     <div style = text-align:center>
-        Created by: Xinghang Xu <br/>
+        Created by: Xinghang Xu<br/>
         Instructor: Suresh Lodha <br/>
         CMPS 263: Data Driven Discovery and Visualization <br/>
         Winter 2018
