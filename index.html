@@ -2,7 +2,6 @@
 <html> 
     
   <head>
-    <!-- Meta Tag -->
     <meta charset="utf-8">
       
     <style>
@@ -18,17 +17,22 @@
   </head>
 
   <body>
-      <!-- Change the title below: REQUIRED-->
     <h1 style = "text-align:center; color:#033066">
         <bold>Population Density of Wisconsin, 2018</bold>
     </h1>
-    <svg style = "align-content:center"></svg>
+    <div style = "text-align: center">
+        <svg></svg>  
+    </div>
+    
       
     <script>
+    var width = 960;
+    var height = 1000;
+        
     var svg = d3.select("svg")
                 .attr("margin", "auto")
-                .attr("width", "960")
-                .attr("height", "1000");
+                .attr("width", width)
+                .attr("height", height);
     
     var path = d3.geoPath();
 
@@ -208,17 +212,14 @@
                 displayBoundary = true;
             }
         });
-        
-        
-        
+
     });
     </script> 
     
-      
-      
-      
+
     <div style = text-align:center>
         Created by: Xinghang Xu<br/>
+        <a href="https://github.com/Xinghom/populationDensity_wisconsin">Visit Github Repo</a> <br/>
         Instructor: Suresh Lodha <br/>
         CMPS 263: Data Driven Discovery and Visualization <br/>
         Winter 2018
